@@ -34,5 +34,18 @@
   "scripts": {
     "test": "node --test \"test/*.test.js\"",
     "sync:vendor": "node scripts/sync-vendor.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "engines": {
+      "dsh": ">=0.1.6-alpha.2"
+    },
+    "compatibility": {
+      "dshReleases": {
+        "0.2.1-rc.2": "compatible"
+      }
+    }
   }
 }

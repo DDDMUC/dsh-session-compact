@@ -84,6 +84,10 @@ mv session.v4.jsonl.zstd.precompact-<时间戳> session.v4.jsonl.zstd
 
 ### 更新日志
 
+**0.1.1** —— 声明 `dsh.bundle`，profile 才能把它当插件管理。
+
+- 首版只装了依赖（pnpm 把包装进了 profile 的 `node_modules`），但插件管理器报 `not-bundle`：包必须声明 `dsh.bundle`（指向 `cordis.patch.yml`）才会被当作可管理的插件。现在按本仓库其它插件的写法补上 `dsh.bundle` 与 `dsh.engines`。
+
 **0.1.0** —— 第一版：启动时自动裁掉空闲会话的历史窗口。
 
 - **为什么**：DSH 的会话日志只增不减，而宿主的压缩是累积的（每个检查点覆盖前一个），于是更早的窗口对模型早已不可见、却还压在日志里。实测一个长会话从 13.2 MB / 29,497 事件裁到 4.8 MB / 9,302 事件，而**模型视图 1000 → 1000 完全不变**。
