@@ -82,6 +82,18 @@ mv session.v4.jsonl.zstd.precompact-<时间戳> session.v4.jsonl.zstd
 - 被宿主持有的会话一律跳过，所以"启动时没被打开的会话"才会被裁；宿主若恢复了标签页，那些会话要等下一次启动。
 - 每次扫描要读全部日志（实测 92 个会话约 20 秒，在启动后台跑）。
 
+### 更新日志
+
+**0.1.0** —— 第一版：启动时自动裁掉空闲会话的历史窗口。
+
+- **为什么**：DSH 的会话日志只增不减，而宿主的压缩是累积的（每个检查点覆盖前一个），于是更早的窗口对模型早已不可见、却还压在日志里。实测一个长会话从 13.2 MB / 29,497 事件裁到 4.8 MB / 9,302 事件，而**模型视图 1000 → 1000 完全不变**。
+
+- **为什么在启动时**：宿主只要打开过某个会话就会持有它的 `session.lock` 直到进程退出（切换对话、关标签页都不释放），此时改文件会被随后的写入覆盖。"宿主刚启动、会话还没被打开"是唯一稳定可用的窗口。
+
+- **安全措施**：被持有的会话一律跳过；过了阈值（条数 / 占比 / 模型视图必须不变）才动手；**先验后写**——裁剪结果要过宿主自己的六项校验（格式层 `dsh-session-format-v3-to-v4`、会话层 `adoptSessionEvent` + `foldSurface`、交叉引用、inbox 投影、结构、标题），任何一项不过就删掉暂存文件、原文件一个字节都不动；原文件改名成 `<日志>.precompact-<时间戳>` 保留，恢复就是改回名字；`dryRun` 只报告不落盘。
+
+- **裁剪内核**来自 [dsh-edit-turn](https://github.com/DDDMUC/dsh-edit-turn) 的 `tools/`（那份不随 npm 包发布），由 `scripts/sync-vendor.mjs` 同步进 `lib/vendor/`。它做的事远不止截断：切点退到 `turn/start`、轮次与步骤从 1 重编号、系统提示词放进第一对 `turn/start`+`step/start` 之后、所有 `*Seq`/`*Seqs`/`*Range` 交叉引用统一重编（`throughSeq` 除外——它指向别的会话）、compaction 记账按模拟出的表面现算、summary 没了就整组丢、inbox 拼接先重放拿到最终状态。
+
 ## English
 
 Compacts idle DSH session logs at startup: keeps the last N windows and drops the ones the model can no longer see. Every result is validated with the host's own format, session and projection validators before it is written; a failed validation leaves the original file untouched. Sessions held by the host (`session.lock`) are always skipped, and the original is kept as `<log>.precompact-<stamp>`.
