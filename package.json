@@ -1,0 +1,38 @@
+{
+  "name": "dsh-session-compact",
+  "version": "0.1.0",
+  "description": "Compact idle DeepSeek Harness session logs at startup: keep the last N windows, drop the ones the model can no longer see, and verify the result with the host's own format, session and projection validators before writing.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "session",
+    "compact",
+    "log",
+    "trim",
+    "windows"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DDDMUC/dsh-session-compact.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "sync:vendor": "node scripts/sync-vendor.mjs"
+  }
+}

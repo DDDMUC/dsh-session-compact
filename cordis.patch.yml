@@ -1,0 +1,9 @@
+# dsh-session-compact bundle patch: inserts the plugin row into the profile roster.
+#
+# The node half scans the session root once at startup — the only window in which
+# a session is not yet held by the host — and compacts the logs that are past the
+# thresholds. There is no browser half: the plugin reports through its logger and
+# through GET /api/dsh-session-compact/status.
+- insert:
+    - id: dsh-session-compact
+      name: 'dsh-session-compact'
